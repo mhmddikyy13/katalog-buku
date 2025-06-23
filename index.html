@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Katalog Buku Perpustakaan</title>
+
+  <!-- ✅ Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="manifest" href="app.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="icons/icon-192.png">
+  <meta name="theme-color" content="#4CAF50">
+</head>
+<body>
+
+  <!-- ✅ Tombol Toggle Dark Mode -->
+  <button class="toggle-dark" onclick="toggleDarkMode()">🌓 Mode</button>
+
+  <h1>Katalog Buku Perpustakaan</h1>
+
+  <!-- ✅ Form Pencarian dan Filter -->
+  <input type="text" id="search" placeholder="Cari judul atau penulis...">
+  <select id="filter">
+    <option value="">Semua Kategori</option>
+    <option value="novel">Novel</option>
+    <option value="edukasi">Edukasi</option>
+    <option value="sejarah">Sejarah</option>
+  </select>
+
+  <!-- ✅ Daftar Buku -->
+  <div id="book-list"></div>
+
+  <!-- ✅ Tombol Install APK -->
+  <button id="installButton" style="display:none;">📲 Install Aplikasi</button>
+
+  <!-- ✅ Script -->
+  <script src="app.js"></script>
+</body>
+</html>
