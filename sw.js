@@ -20,40 +20,66 @@ const urlsToCache = [
   '/images/perang.jpg'
 ];
 
+const googleFontsUrls = [
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap',
+];
+
 self.addEventListener('install', event => {
   console.log('[ServiceWorker] Install event in progress.');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[ServiceWorker] Attempting to cache all specified files.');
-        // Menggunakan Promise.allSettled untuk melihat status setiap URL
-        // dan logging hasil untuk setiap upaya caching
-        const cachePromises = urlsToCache.map(url => {
+        console.log('[ServiceWorker] Attempting to cache all specified LOCAL files.');
+        const localCachePromises = urlsToCache.map(url => {
           return cache.add(url)
             .then(() => {
-              console.log(`[ServiceWorker] Successfully cached: ${url}`);
-              return { status: 'fulfilled', value: url }; // Menandakan sukses
+              console.log(`[ServiceWorker] Successfully cached local: ${url}`);
+              return { status: 'fulfilled', value: url };
             })
             .catch(error => {
-              console.error(`[ServiceWorker] Failed to cache: ${url} -`, error);
-              return { status: 'rejected', reason: { url, error } }; // Menandakan gagal
+              console.error(`[ServiceWorker] Failed to cache local: ${url} -`, error);
+              return { status: 'rejected', reason: { url, error } };
             });
         });
-        return Promise.allSettled(cachePromises); // Menunggu semua upaya caching selesai
+
+        return Promise.allSettled(localCachePromises);
       })
-      .then(results => {
-        // Setelah semua upaya selesai, cek apakah ada yang gagal
-        const failed = results.filter(result => result.status === 'rejected');
-        if (failed.length > 0) {
-          console.error('[ServiceWorker] Some files failed to cache. Details:', failed);
-          // Anda bisa memilih untuk tidak melempar error di sini jika ingin Service Worker tetap aktif
-          // meskipun beberapa aset gagal di-cache.
+      .then(localResults => {
+        const failedLocal = localResults.filter(result => result.status === 'rejected');
+        if (failedLocal.length > 0) {
+          console.error('[ServiceWorker] Some LOCAL files failed to cache. Details:', failedLocal);
         } else {
-          console.log('[ServiceWorker] All specified files were successfully added to cache.');
+          console.log('[ServiceWorker] All specified LOCAL files were successfully added to cache.');
         }
+
+        console.log('[ServiceWorker] Attempting to cache Google Fonts (cross-origin).');
+        return Promise.allSettled(
+            googleFontsUrls.map(url => {
+                return caches.open(CACHE_NAME).then(cache => {
+                    return fetch(url).then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        return cache.put(url, response.clone()).then(() => {
+                            console.log(`[ServiceWorker] Successfully cached Google Font: ${url}`);
+                            return { status: 'fulfilled', value: url };
+                        });
+                    });
+                }).catch(error => {
+                    console.error(`[ServiceWorker] Failed to cache Google Font: ${url} -`, error);
+                    return { status: 'rejected', reason: { url, error } };
+                });
+            })
+        );
+      })
+      .then(fontResults => {
+          const failedFonts = fontResults.filter(result => result.status === 'rejected');
+          if (failedFonts.length > 0) {
+              console.error('[ServiceWorker] Some Google Fonts failed to cache. Details:', failedFonts);
+          } else {
+              console.log('[ServiceWorker] All specified Google Fonts were successfully added to cache.');
+          }
       })
       .catch(error => {
-        console.error('[ServiceWorker] Overall caching process failed:', error);
+        console.error('[ServiceWorker] Overall installation process failed:', error);
       })
   );
 });
@@ -61,18 +87,15 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(response => {
-      // Log ini akan memberitahu kita apakah permintaan dilayani dari cache
       if (response) {
         console.log(`[ServiceWorker] Serving from cache: ${event.request.url}`);
         return response;
       }
       console.log(`[ServiceWorker] Fetching from network: ${event.request.url}`);
-      return fetch(event.request);
-    }).catch(error => {
-      // Log error jika fetch dari jaringan juga gagal (saat offline)
-      console.error(`[ServiceWorker] Fetch failed for ${event.request.url}:`, error);
-      // Anda bisa menambahkan respons fallback offline page di sini
-      // return caches.match('/offline.html');
+      return fetch(event.request).catch(error => {
+        console.error(`[ServiceWorker] Fetch failed for ${event.request.url}:`, error);
+        throw error;
+      });
     })
   );
 });
