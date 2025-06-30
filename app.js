@@ -98,14 +98,14 @@ searchInput.addEventListener('input', renderBooks);
 filterSelect.addEventListener('change', renderBooks);
 renderBooks();
 
-// ✅ Service Worker
+//  Service Worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').then(() => {
     console.log('Service Worker registered');
   });
 }
 
-// ✅ INSTALL APK
+//  INSTALL APK
 let deferredPrompt;
 const installBtn = document.getElementById('installButton');
 
@@ -126,7 +126,7 @@ installBtn.addEventListener('click', async () => {
   installBtn.style.display = 'none';
 });
 
-// ✅ DARK MODE FUNCTION
+//  DARK MODE FUNCTION
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
 }

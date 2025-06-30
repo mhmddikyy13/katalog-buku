@@ -44,7 +44,7 @@ input, select {
   gap: 20px;
 }
 
-/* ✅ Gaya kartu buku modern dengan gambar di atas */
+/*  Gaya kartu buku modern dengan gambar di atas */
 .book {
   background-color: var(--card-bg);
   border-radius: 8px;
@@ -71,7 +71,7 @@ input, select {
   margin-top: 0.5rem;
 }
 
-/* ✅ Tombol install & dark mode */
+/*  Tombol install & dark mode */
 button {
   background-color: var(--accent-color);
   color: white;
